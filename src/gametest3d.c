@@ -73,8 +73,6 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 	car = entity_new();
 
-	entity_obj_load(car,"models/cube.obj");
-	entity_load_sprite(car,"models/cube_text.png",1024,1024);
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -94,6 +92,9 @@ void set_camera(Vec3D position, Vec3D rotation);
     
     //obj = obj_load("models/cube.obj");
     //texture = LoadSprite("models/cube_text.png",1024,1024);
+
+	entity_obj_load(car,"models/cube.obj");
+	entity_load_sprite(car,"models/cube_text.png",1024,1024);
 
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
