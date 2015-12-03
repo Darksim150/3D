@@ -31,7 +31,7 @@
 #include "mgl_callback.h"
 
 void set_camera(Vec3D position, Vec3D rotation);
- Vec3D cameraPosition = {0,-10,0};
+ Vec3D cameraPosition = {0,0,0};
  Vec3D cameraRotation = {90,0,0};
 
  void resetCamera(Vec3D targetPosition, Vec3D targetRotation)
@@ -49,10 +49,6 @@ void set_camera(Vec3D position, Vec3D rotation);
     float r = 0;
     GLuint triangleBufferObject;
     char bGameLoopRunning = 1;
-   
-
-	Vec3D carPosition = {0,0,0};
-    Vec3D carRotation = {0,0,0};
 
     SDL_Event e;
     Obj *obj,*bgobj;
@@ -67,12 +63,13 @@ void set_camera(Vec3D position, Vec3D rotation);
         0.0f, 0.0f, 1.0f, 1.0f  
     }; //we love you vertices!
 
+	int i;
+
 	Entity* car;
 
 	entity_init(255);
 
 	car = entity_new();
-
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -113,8 +110,8 @@ void set_camera(Vec3D position, Vec3D rotation);
                 }
 
 
-
-                /*else if (e.key.keysym.sym == SDLK_SPACE)
+				/*
+                else if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++,
                     slog("move up");
@@ -218,26 +215,84 @@ void set_camera(Vec3D position, Vec3D rotation);
                 }*/
 
 				
+
+
+
+
 				 else if (e.key.keysym.sym == SDLK_w)
                 {
-                    carPosition.y += 1;
+                    vec3d_add(
+                        cameraPosition,
+                        cameraPosition,
+                        vec3d(
+                            -sin(cameraRotation.z * DEGTORAD),
+                            cos(cameraRotation.z * DEGTORAD),
+                            0
+                        ));
+					vec3d_add(
+                        car->body.position,
+                        car->body.position,
+                        vec3d(
+                            -sin(car->rotation.z * DEGTORAD),
+                            cos(car->rotation.z * DEGTORAD),
+                            0
+                        ));
+                    slog("move forward");
+                    slog("(%f,%f,%f)",cameraPosition.x,cameraPosition.y,cameraPosition.z);
+                }
+
+                else if (e.key.keysym.sym == SDLK_s)
+                {
+                    vec3d_add(
+                        cameraPosition,
+                        cameraPosition,
+                        vec3d(
+                            sin(cameraRotation.z * DEGTORAD),
+                            -cos(cameraRotation.z * DEGTORAD),
+                            0
+                        ));
+					vec3d_add(
+                        car->body.position,
+                        car->body.position,
+                        vec3d(
+                            sin(car->rotation.z * DEGTORAD),
+                            -cos(car->rotation.z * DEGTORAD),
+                            0
+                        ));
+                    slog("move back");
+                    slog("(%f,%f,%f)",cameraPosition.x,cameraPosition.y,cameraPosition.z);
+                }
+
+
+
+
+
+				 /*
+				if (e.key.keysym.sym == SDLK_w)
+                {
+					car->body.position.y += 1;
+					//carPosition.y += 1;
 					cameraPosition.y +=1;
                     slog("move forward");
                 }
                 else if (e.key.keysym.sym == SDLK_s)
                 {
-                    carPosition.y -= 1;
+					car->body.position.y -= 1;
+                    //carPosition.y -= 1;
 					cameraPosition.y -=1;
                     slog("move back");
-                }
-				  else if (e.key.keysym.sym == SDLK_LEFT)
+                }*/
+				
+				if (e.key.keysym.sym == SDLK_LEFT)
                 {
+					car->rotation.z += 1;
                     cameraRotation.z += 1;
                     slog("rotate left");
                     slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
                 {
+					car->rotation.z -= 1;
                     cameraRotation.z -= 1;
                     slog("right");
                     slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
@@ -275,6 +330,22 @@ void set_camera(Vec3D position, Vec3D rotation);
             }
         }
 
+		for(i = 0; i < 10; i++)
+		{
+			vec3d_add(
+                        cameraPosition,
+                        cameraPosition,
+                        vec3d(
+                            sin(cameraRotation.z * DEGTORAD),
+                            -cos(cameraRotation.z * DEGTORAD),
+                            0
+                        ));
+		}
+
+		cameraPosition.z = 5;
+
+		cameraRotation.x = 70;
+
         graphics3d_frame_begin();
 
         glPushMatrix();
@@ -285,8 +356,7 @@ void set_camera(Vec3D position, Vec3D rotation);
        
         set_camera(
             cameraPosition,
-            cameraRotation);
-		
+            cameraRotation);		
   
         obj_draw(
             bgobj,
@@ -296,16 +366,6 @@ void set_camera(Vec3D position, Vec3D rotation);
             vec4d(1,1,1,1),
             bgtext
         ); 
-        
-		/*obj_draw(
-            obj,
-            carPosition,
-            carRotation,
-            vec3d(0.5,0.5,0.5),
-            vec4d(1,1,1,1),
-            texture
-        );*/
-        //if (r > 360)r -= 360;
 
 		entity_draw(car);
 
@@ -318,6 +378,11 @@ void set_camera(Vec3D position, Vec3D rotation);
         /* drawing code above here! */
 
         graphics3d_next_frame();
+
+		cameraPosition.z = 0;
+		cameraRotation.x = 90;
+
+		cameraPosition = car->body.position;
     } 
     return 0;
 }
