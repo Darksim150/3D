@@ -60,4 +60,6 @@ void entity_obj_load(Entity *ent, char *filename);
 
 void entity_load_sprite(Entity *ent, char *filename, int fw, int fh);
 
+extern Entity* car;
+
 #endif

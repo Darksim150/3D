@@ -40,4 +40,6 @@ Vec4D vec4d(float x,float y, float z, float w);
 
 Vec3D Normalize(Vec3D vector);
 
+Vec3D vec_scale(Vec3D vec, float scale);
+
 #endif

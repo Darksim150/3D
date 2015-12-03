@@ -28,4 +28,13 @@ Vec3D Normalize(Vec3D vector)
 	unit.z = vector.z/magnitude;
 	return unit;
 }
+
+Vec3D vec_scale(Vec3D vec, float scale)
+{
+	vec.x *= scale;
+	vec.y *= scale;
+	vec.z *= scale;
+
+	return vec;
+}
 /*eol@eof*/

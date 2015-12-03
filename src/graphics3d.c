@@ -4,12 +4,13 @@
 #include "shader.h"
 #include <GL/glu.h>
 #include <SDL_image.h>
+#include "entity.h"
 
 
 static SDL_GLContext __graphics3d_gl_context;
 static SDL_Window  * __graphics3d_window = NULL;
 static GLuint        __graphics3d_shader_program;
-static Uint32        __graphics3d_frame_delay = 33;
+static Uint32        __graphics3d_frame_delay = 16;
 static SDL_Surface * __title_screen;
 static GLuint		 __title_id;
 static GLuint		 __speed_id;
@@ -352,6 +353,8 @@ void orthogonalEnd()
 
 void draw_speed()
 {
+	needleRotation = car->body.velocity.y/100.0*270.0;
+	if(needleRotation < 0)needleRotation *= -1;
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __speed_id, 0, 1);
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);
 }
