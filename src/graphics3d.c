@@ -10,7 +10,7 @@
 static SDL_GLContext __graphics3d_gl_context;
 static SDL_Window  * __graphics3d_window = NULL;
 static GLuint        __graphics3d_shader_program;
-static Uint32        __graphics3d_frame_delay = 16;
+static Uint32        __graphics3d_frame_delay = 33;
 static SDL_Surface * __title_screen;
 static GLuint		 __title_id;
 static GLuint		 __speed_id;
@@ -98,7 +98,7 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     glLoadIdentity();
     /*view angle, aspect ratio, near clip distance, far clip distance*/
     /*TODO: put near/far clip in graphics view config*/
-    gluPerspective( 60, (float)sw / (float)sh, .01, 2000.0f);
+    gluPerspective( 60, (float)sw / (float)sh, .01, 4000.0f);
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
@@ -353,7 +353,7 @@ void orthogonalEnd()
 
 void draw_speed()
 {
-	needleRotation = car->body.velocity.y/100.0*270.0;
+	needleRotation = car->body.velocity.y/10.0*270.0;
 	if(needleRotation < 0)needleRotation *= -1;
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __speed_id, 0, 1);
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);

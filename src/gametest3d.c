@@ -46,6 +46,7 @@ void set_camera(Vec3D position, Vec3D rotation);
  }
 
  Entity* car;
+ Entity* track;
  
  int main(int argc, char *argv[])
 {
@@ -53,6 +54,12 @@ void set_camera(Vec3D position, Vec3D rotation);
     float r = 0;
     GLuint triangleBufferObject;
     char bGameLoopRunning = 1;
+
+	int brake = 0;
+
+	int current_time;
+
+	int last_time;
 
     SDL_Event e;
     Obj *obj,*bgobj;
@@ -71,10 +78,12 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 	car = entity_new();
 
+	track = entity_new();
+
 	key_state = SDL_GetKeyboardState(NULL);
     
     init_logger("gametest3d.log");
-    if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
+    if (graphics3d_init(1280,960,1,"gametest3d",16) != 0)
     {
         return -1;
     }
@@ -88,24 +97,33 @@ void set_camera(Vec3D position, Vec3D rotation);
     glBindBuffer(GL_ARRAY_BUFFER, triangleBufferObject); //we're "using" this one now
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW); //formatting the data for the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind any buffers
-    
-    //obj = obj_load("models/cube.obj");
-    //texture = LoadSprite("models/cube_text.png",1024,1024);
 
 	entity_obj_load(car,"models/cube.obj");
 	entity_load_sprite(car,"models/cube_text.png",1024,1024);
 
-    bgobj = obj_load("models/mountainvillage.obj");
-    bgtext = LoadSprite("models/mountain_text.png",1024,1024);
+	entity_obj_load(track,"models/flat_road.obj");
+	entity_load_sprite(track,"models/track_text.png",1024,1024);
+
+	track->rotation.x = 90;
+	track->rotation.y = 90;
+	
+	bgobj = obj_load("models/grass.obj");
+    bgtext = LoadSprite("models/grass_text.png",1024,1024);
 
     rotation_impulse = 0;
 
+	current_time = SDL_GetTicks();
+
     while (bGameLoopRunning)
     {
+		last_time = current_time;
+		current_time = SDL_GetTicks();
 
 		car->acceleration.y = 0;
 
 		rotation_impulse = 0;
+
+		brake = 0;
 
 		SDL_PumpEvents();
 
@@ -126,8 +144,12 @@ void set_camera(Vec3D position, Vec3D rotation);
 		 }
 		 if (key_state[SDL_SCANCODE_S])
 		 {
-			 car->acceleration.y = -1;
+			 car->acceleration.y = -0.1;
 			 slog("accelerate backwards");
+		 }
+		 if (key_state[SDL_SCANCODE_SPACE])
+		 {
+			 brake = 1;
 		 }
 
 		 if (key_state[SDL_SCANCODE_LEFT])
@@ -143,70 +165,30 @@ void set_camera(Vec3D position, Vec3D rotation);
              slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
 		 }
 
+		car->body.velocity.y += car->acceleration.y*6*(current_time - last_time)/1000.0f;
 
-
-        /*while ( SDL_PollEvent(&e) ) 
-        {
-            if (e.type == SDL_QUIT)
-                bGameLoopRunning = 0;
-            else if (e.type == SDL_KEYDOWN)
-            {
-                if (e.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    bGameLoopRunning = 0;
-                }
-
-				
-				if (e.key.keysym.sym == SDLK_w)
-				{
-					car->acceleration.y = 1;
-				}
-				if (e.key.keysym.sym == SDLK_s)
-				{
-					car->acceleration.y = -1;
-				}
-
-
-				if (e.key.keysym.sym == SDLK_LEFT)
-                {
-					rotation_impulse = 1;
-                    slog("rotate left");
-                    slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
-				}
-
-                if (e.key.keysym.sym == SDLK_RIGHT)
-                {
-					rotation_impulse = -1;
-                    slog("right");
-                    slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
-				}
-
-            }
-
-			else if(e.type == SDL_KEYUP)
+		if (brake == 1)
+		{
+			if (car->body.velocity.y > 0)
 			{
-				if (e.key.keysym.sym == SDLK_LEFT)
-                {
-					rotation_impulse -= 1;
-					if(rotation_impulse < -1) rotation_impulse = -1;
-				}
-				if (e.key.keysym.sym == SDLK_RIGHT)
-                {
-					rotation_impulse += 1;
-					if(rotation_impulse > 1) rotation_impulse = 1;
-				}
+				car->body.velocity.y -= 3*(current_time - last_time)/1000.0f;
+				if  (car->body.velocity.y < 0) car->body.velocity.y = 0;
 			}
-        }*/
-		
+			else if (car->body.velocity.y < 0)
+			{
+				car->body.velocity.y += 3*(current_time - last_time)/1000.0f;
+				if  (car->body.velocity.y > 0) car->body.velocity.y = 0;
+			}
+			else {car->body.velocity.y = 0;}
+		}
 
-		car->body.velocity.y += car->acceleration.y;
-
-		car->body.velocity.y *= 0.8;
+		car->body.velocity.y *= 0.99;
 
 		slog("(%f)",car->body.velocity.y);
 
-		car->rotation.z += rotation_impulse*3;
-        cameraRotation.z += rotation_impulse*3;
+		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f;
+
+        cameraRotation.z = car->rotation.z;
 
 
 
@@ -271,15 +253,18 @@ void set_camera(Vec3D position, Vec3D rotation);
         set_camera(
             cameraPosition,
             cameraRotation);		
-  
+		
         obj_draw(
             bgobj,
             vec3d(0,0,0),
             vec3d(90,90,0),
-            vec3d(5,5,5),
+            vec3d(1,1,1),
             vec4d(1,1,1,1),
             bgtext
-        ); 
+        );
+
+		
+		entity_draw(track);
 
 		entity_draw(car);
 
