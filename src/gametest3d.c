@@ -101,7 +101,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 	entity_obj_load(car,"models/cube.obj");
 	entity_load_sprite(car,"models/cube_text.png",1024,1024);
 
-	entity_obj_load(track,"models/flat_road.obj");
+	entity_obj_load(track,"models/track.obj");
 	entity_load_sprite(track,"models/track_text.png",1024,1024);
 
 	track->rotation.x = 90;
@@ -171,12 +171,12 @@ void set_camera(Vec3D position, Vec3D rotation);
 		{
 			if (car->body.velocity.y > 0)
 			{
-				car->body.velocity.y -= 3*(current_time - last_time)/1000.0f;
+				car->body.velocity.y -= 4*(current_time - last_time)/1000.0f;
 				if  (car->body.velocity.y < 0) car->body.velocity.y = 0;
 			}
 			else if (car->body.velocity.y < 0)
 			{
-				car->body.velocity.y += 3*(current_time - last_time)/1000.0f;
+				car->body.velocity.y += 4*(current_time - last_time)/1000.0f;
 				if  (car->body.velocity.y > 0) car->body.velocity.y = 0;
 			}
 			else {car->body.velocity.y = 0;}
@@ -189,8 +189,6 @@ void set_camera(Vec3D position, Vec3D rotation);
 		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f;
 
         cameraRotation.z = car->rotation.z;
-
-
 
 		if (car->body.velocity.y > 0)
         {
@@ -229,8 +227,6 @@ void set_camera(Vec3D position, Vec3D rotation);
 				);
             slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
         }
-
-
 
 		vec3d_add(
             cameraPosition,

@@ -10,12 +10,9 @@
 static SDL_GLContext __graphics3d_gl_context;
 static SDL_Window  * __graphics3d_window = NULL;
 static GLuint        __graphics3d_shader_program;
-static Uint32        __graphics3d_frame_delay = 33;
-static SDL_Surface * __title_screen;
+static Uint32        __graphics3d_frame_delay = 16;
 static GLuint		 __title_id;
 static GLuint		 __speed_id;
-static SDL_Surface * __speed_img;
-static SDL_Surface * __needle_img;
 static GLuint		 __needle_id;
 
 GLfloat needleRotation = 0;
@@ -117,52 +114,11 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     graphics3d_setup_default_light();
     atexit(graphics3d_close);
 
-	__title_screen = IMG_Load("title.png");
+	bind_image("title.png", &__title_id);
 
-	glGenTextures(1, &__title_id);
-    glBindTexture(GL_TEXTURE_2D, __title_id);
-    
-    
-    if(__title_screen->format->BytesPerPixel == 4) {
-        Mode = GL_RGBA;
-    }
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, Mode, __title_screen->w, __title_screen->h, 0, Mode, GL_UNSIGNED_BYTE, __title_screen->pixels);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+	bind_image("speed.png", &__speed_id);
 
-	__speed_img = IMG_Load("speed.png");
-
-	glGenTextures(1, &__speed_id);
-    glBindTexture(GL_TEXTURE_2D, __speed_id);
-    
-    
-    if(__speed_img->format->BytesPerPixel == 4) {
-        Mode = GL_RGBA;
-    }
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, Mode, __speed_img->w, __speed_img->h, 0, Mode, GL_UNSIGNED_BYTE, __speed_img->pixels);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-
-	
-	__needle_img = IMG_Load("needle.png");
-
-	glGenTextures(1, &__needle_id);
-    glBindTexture(GL_TEXTURE_2D, __needle_id);
-    
-    
-    if(__needle_img->format->BytesPerPixel == 4) {
-        Mode = GL_RGBA;
-    }
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, Mode, __needle_img->w, __needle_img->h, 0, Mode, GL_UNSIGNED_BYTE, __needle_img->pixels);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-
+	bind_image("needle.png", &__needle_id);
 
     return 0;
 }
@@ -438,112 +394,24 @@ void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest
 	orthogonalEnd();
 }
 
-/*
-
-void drawBB(Entity *ent)
+void bind_image(char* file, GLuint *id)
 {
-	int tris[36] = 
-					{1,0,2,
-					 2,3,1,
-					 5,4,0,
-					 0,1,5,
-					 5,1,3,
-					 3,7,5,
-					 6,7,2,
-					 7,3,2,
-					 0,4,2,
-					 4,6,2,
-					 4,5,6,
-					 5,7,6};
-	int i;
-	float x = ent->body.bounds.x+ent->body.position.x;
-	float y = ent->body.bounds.y+ent->body.position.y;
-	float z = ent->body.bounds.z+ent->body.position.z;
-	float w = ent->body.bounds.w;
-	float h = ent->body.bounds.h;
-	float d = ent->body.bounds.d;
-	Vec3D verts[8] = 
-	{
-		{x,y+h,z},
-		{x+w,y+h,z},
-		{x,y,z},
-		{x+w,y,z},
-		{x,y+h,z+d},
-		{x+w,y+h,z+d},
-		{x,y,z+d},
-		{x+w,y,z+d}
-	};
-    glEnable(GL_BLEND);
-    glColorMaterial(GL_FRONT,GL_DIFFUSE);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	glPushMatrix();
-	glRotatef(ent->rotation.x, 1.0f, 0.0f, 0.0f);
-    glRotatef(ent->rotation.y, 0.0f, 1.0f, 0.0f);
-    glRotatef(ent->rotation.z, 0.0f, 0.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
+	int Mode = GL_RGB;
 
-		for(i=0;i<12;i++)
-		{
-			glColor4f(1.0f,0.0f,0.0f,0.25f);
-			glVertex3f(verts[tris[3*i]].x,
-			verts[tris[3*i]].y,
-			verts[tris[3*i]].z);
+	SDL_Surface * img;
 
-			glColor4f(1.0f,0.0f,0.0f,0.25f);
-			glVertex3f(verts[tris[3*i+1]].x,
-			verts[tris[3*i+1]].y,
-			verts[tris[3*i+1]].z);
+	img = IMG_Load(file);
 
-			glColor4f(1.0f,0.0f,0.0f,0.25f);
-			glVertex3f(verts[tris[3*i+2]].x,
-			verts[tris[3*i+2]].y,
-			verts[tris[3*i+2]].z);
-
-
-
-		}
-		glEnd();
-    glBegin(GL_LINES);
-
-		for(i=0;i<12;i++)
-		{
-			glColor4f(1.0f,1.0f,0.0f,1.0f);
-			glVertex3f(verts[tris[3*i]].x,
-			verts[tris[3*i]].y,
-			verts[tris[3*i]].z);
-
-			glColor4f(1.0f,1.0f,0.0f,1.0f);
-			glVertex3f(verts[tris[3*i+1]].x,
-			verts[tris[3*i+1]].y,
-			verts[tris[3*i+1]].z);
-
-			glColor4f(1.0f,1.0f,0.0f,1.0f);
-			glVertex3f(verts[tris[3*i+1]].x,
-			verts[tris[3*i+1]].y,
-			verts[tris[3*i+1]].z);
-
-			glColor4f(1.0f,1.0f,0.0f,1.0f);
-			glVertex3f(verts[tris[3*i+2]].x,
-			verts[tris[3*i+2]].y,
-			verts[tris[3*i+2]].z);
-
-			glColor4f(1.0f,1.0f,0.0f,1.0f);
-			glVertex3f(verts[tris[3*i+2]].x,
-			verts[tris[3*i+2]].y,
-			verts[tris[3*i+2]].z);
-
-			glColor4f(1.0f,1.0f,0.0f,1.0f);
-			glVertex3f(verts[tris[3*i]].x,
-			verts[tris[3*i]].y,
-			verts[tris[3*i]].z);
-
-
-
-		}
-		glEnd();
+	glGenTextures(1, id);
+    glBindTexture(GL_TEXTURE_2D,*id);
     
-    glDisable(GL_BLEND);
-    glDisable(GL_COLOR_MATERIAL);
-	glPopMatrix();
+    
+    if(img->format->BytesPerPixel == 4) {
+        Mode = GL_RGBA;
+    }
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, Mode, img->w, img->h, 0, Mode, GL_UNSIGNED_BYTE, img->pixels);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 }
-*/
