@@ -73,6 +73,10 @@ void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest
 
 void bind_image(char* file, GLuint *id);
 
+void draw_gear();
+
 extern GLfloat needleRotation;
+
+extern int gear;
 
 #endif

@@ -14,8 +14,14 @@ static Uint32        __graphics3d_frame_delay = 16;
 static GLuint		 __title_id;
 static GLuint		 __speed_id;
 static GLuint		 __needle_id;
+static GLuint		 __1_id;
+static GLuint		 __2_id;
+static GLuint		 __R_id;
+
 
 GLfloat needleRotation = 0;
+
+int gear;
 
 void graphics3d_close();
 
@@ -33,7 +39,7 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     const unsigned char *version;
     GLenum glew_status;
         
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
     {
         slog("failed to initialize SDL!");
         return -1;
@@ -119,6 +125,12 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
 	bind_image("speed.png", &__speed_id);
 
 	bind_image("needle.png", &__needle_id);
+
+	bind_image("1.png", &__1_id);
+
+	bind_image("2.png", &__2_id);
+
+	bind_image("R.png", &__R_id);
 
     return 0;
 }
@@ -291,8 +303,6 @@ void orthogonalStart()
 
 	gluOrtho2D(-1, 1, -1, 1);
 
-	//glRotatef(180,0,0,0);
-
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 }
@@ -313,6 +323,13 @@ void draw_speed()
 	if(needleRotation < 0)needleRotation *= -1;
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __speed_id, 0, 1);
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);
+}
+
+void draw_gear()
+{
+	if(gear == 1)drawQuad(vec2d(.25f,.35f), vec2d(-.75f,-.75f), __1_id, 0, 1);
+	else if(gear == 2)drawQuad(vec2d(.25f,.35f), vec2d(-.75f,-.75f), __2_id, 0, 1);
+	else if(gear == 0)drawQuad(vec2d(.25f,.35f), vec2d(-.75f,-.75f), __R_id, 0, 1);
 }
 
 void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest)
