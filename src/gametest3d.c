@@ -68,6 +68,8 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 	int cross;
 
+	float camera_rotation_x;
+
     SDL_Event e;
     Obj *obj,*bgobj;
     Sprite *texture,*bgtext;
@@ -126,8 +128,16 @@ void set_camera(Vec3D position, Vec3D rotation);
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW); //formatting the data for the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind any buffers
 
-	entity_obj_load(car,"models/cube.obj");
-	entity_load_sprite(car,"models/cube_text.png",1024,1024);
+	//entity_obj_load(car,"models/cube.obj");
+	//entity_load_sprite(car,"models/cube_text.png",1024,1024);
+
+	entity_obj_load(car,"models/blue_falcon.obj");
+	entity_load_sprite(car,"models/BLF1.jpg",512,512);
+
+	
+	car->scale.x = 2;
+	car->scale.y = 2;
+	car->scale.z = 2;	
 
 	entity_obj_load(track,"models/track.obj");
 	entity_load_sprite(track,"models/track_text.png",1024,1024);
@@ -199,15 +209,25 @@ void set_camera(Vec3D position, Vec3D rotation);
 		}
 
 
-		car->acceleration.y = (SDL_JoystickGetAxis(joy, 5)/32767.0f)+1;
+		car->acceleration.y = (SDL_JoystickGetAxis(joy, 5)/32768.0f)+1;
 
 		brake = (SDL_JoystickGetAxis(joy, 4)/32767.0f)+1;
 
+
+
 		rotation_impulse = -SDL_JoystickGetAxis(joy, 0)/32767.0f;
 
+		camera_rotation_x = -SDL_JoystickGetAxis(joy, 2)/32767.0f;
+
 		if (rotation_impulse < 0.1 && rotation_impulse > -0.1) rotation_impulse = 0;
+		else if (rotation_impulse > 0.1) rotation_impulse -= 0.1;
+		else if (rotation_impulse < -0.1) rotation_impulse += 0.1;
+
+		if (camera_rotation_x < 0.1 && camera_rotation_x > -0.1) camera_rotation_x = 0;
+		else if (camera_rotation_x > 0.1) camera_rotation_x -= 0.1;
+		else if (camera_rotation_x < -0.1) camera_rotation_x += 0.1;
 		
-		if(SDL_JoystickGetButton(joy, 12) == 1)
+		if(SDL_JoystickGetButton(joy, 12) == 1 || key_state[SDL_SCANCODE_D])
 		{
 			if(square == 0)
 			{
@@ -221,7 +241,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 			square = 0;
 		}
 
-		if(SDL_JoystickGetButton(joy, 10) == 1)
+		if(SDL_JoystickGetButton(joy, 10) == 1 || key_state[SDL_SCANCODE_A])
 		{
 			if(cross == 0)
 			{
@@ -243,7 +263,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 		 //slog("(%d)",SDL_JoystickGetAxis(joy, 4));
 		 //slog("(%d)",SDL_JoystickGetAxis(joy, 5));
 
-		slog("(%d)",SDL_JoystickGetButton(joy, 1));
+		//slog("(%d)",SDL_JoystickGetButton(joy, 1));
 
          if (key_state[SDL_SCANCODE_ESCAPE])
          {
@@ -252,18 +272,17 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 		 if (key_state[SDL_SCANCODE_W])
 		 {
-			 car->acceleration.y = 1;
+			 car->acceleration.y = 2;
 			 slog("accelerate forwards");
 		 }
+
+		 /*
 		 if (key_state[SDL_SCANCODE_S])
 		 {
 			 car->acceleration.y = -0.1;
 			 slog("accelerate backwards");
 		 }
-		 if (key_state[SDL_SCANCODE_SPACE])
-		 {
-			 brake = 1;
-		 }
+		 */
 
 		 if (key_state[SDL_SCANCODE_LEFT])
 		 {
@@ -271,43 +290,61 @@ void set_camera(Vec3D position, Vec3D rotation);
              slog("rotate left");
              slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
 		 }
-		  if (key_state[SDL_SCANCODE_RIGHT])
+		 if (key_state[SDL_SCANCODE_RIGHT])
 		 {
 			 rotation_impulse = -1;
              slog("right");
              slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
 		 }
 
-		  if(gear == 1) car->body.velocity.y += car->acceleration.y*2*(current_time - last_time)/1000.0f;
+		  if (key_state[SDL_SCANCODE_SPACE])
+		 {
+			 brake = 1;
+		 }
 
-		  else if(gear == 2) car->body.velocity.y += car->acceleration.y*3*(current_time - last_time)/1000.0f;
+		  if(gear == 1) 
+		  {
+			  car->body.velocity.y += car->acceleration.y*3.5*(current_time - last_time)/1000.0f;
+			  car->body.velocity.y *= 0.98;
+		  }
 
-		  else if(gear == 0) car->body.velocity.y -= car->acceleration.y*1*(current_time - last_time)/1000.0f;
+		  else if(gear == 2) 
+		  {
+			  car->body.velocity.y += car->acceleration.y*1*(current_time - last_time)/1000.0f;
+			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.997;
+			  else{car->body.velocity.y *= 0.98;}
+		  }
+
+		  else if(gear == 0) 
+		  {
+			  car->body.velocity.y -= car->acceleration.y*1*(current_time - last_time)/1000.0f;
+			  car->body.velocity.y *= 0.98;
+		  }
 
 
 		//car->body.velocity.y += car->acceleration.y*3*(current_time - last_time)/1000.0f;
 
-		
-			if (car->body.velocity.y > 0)
-			{
-				car->body.velocity.y -= brake*4*(current_time - last_time)/1000.0f;
-				if  (car->body.velocity.y < 0) car->body.velocity.y = 0;
-			}
-			else if (car->body.velocity.y < 0)
-			{
-				car->body.velocity.y += brake*4*(current_time - last_time)/1000.0f;
-				if  (car->body.velocity.y > 0) car->body.velocity.y = 0;
-			}
-			else {car->body.velocity.y = 0;}
-		
 
-		car->body.velocity.y *= 0.99;
+		if (car->body.velocity.y > 0)
+		{
+			car->body.velocity.y -= brake*4*(current_time - last_time)/1000.0f;
+			if  (car->body.velocity.y < 0) car->body.velocity.y = 0;
+		}
+		else if (car->body.velocity.y < 0)
+		{
+			car->body.velocity.y += brake*4*(current_time - last_time)/1000.0f;
+			if  (car->body.velocity.y > 0) car->body.velocity.y = 0;
+		}
+		else {car->body.velocity.y = 0;}
 		
-		if (cube_cube_intersection(car->bounds,collision->bounds) == 1) car->body.velocity.y *= 0.5;
+		//car->body.velocity.y *= 0.98;
+		
+		
+		//if (cube_cube_intersection(car->bounds,collision->bounds) == 1) car->body.velocity.y *= 0.5;
 
-		//slog("(%f)",car->body.velocity.y);
+		slog("(%f)",car->body.velocity.y);
 
-		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f;
+		car->rotation.z += rotation_impulse*130*(current_time - last_time)/1000.0f;
 
         cameraRotation.z = car->rotation.z;
 
@@ -349,12 +386,18 @@ void set_camera(Vec3D position, Vec3D rotation);
             //slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
         }
 
-		cameraRotation.z += rotation_impulse*5;
+		//car->rotation.y = rotation_impulse*10;
+
+		cameraRotation.z -= rotation_impulse*2;
+
+		cameraRotation.y = -rotation_impulse*1.5;
+
+		cameraRotation.z += camera_rotation_x*90;
 
 		vec3d_add(
             cameraPosition,
             cameraPosition,
-            vec_scale(vec3d(sin(cameraRotation.z * DEGTORAD),-cos(cameraRotation.z * DEGTORAD),0), 8 + (car->body.velocity.y*0.5))
+            vec_scale(vec3d(sin(cameraRotation.z * DEGTORAD),-cos(cameraRotation.z * DEGTORAD),0), 7.5 + (car->body.velocity.y*0.5))
 		);
 
 		cameraPosition.z = 5;
@@ -365,7 +408,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 
         glPushMatrix();
 
-		draw_title();
+		draw_title();  //used for the blue background
 
 		glPushMatrix();
        
@@ -385,7 +428,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 		
 		entity_draw(track);
 
-		entity_draw(collision);
+		//entity_draw(collision);
 
 		entity_draw(car);
 

@@ -122,9 +122,9 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
 
 	bind_image("title.png", &__title_id);
 
-	bind_image("speed.png", &__speed_id);
+	bind_image("speed_white.png", &__speed_id);
 
-	bind_image("needle.png", &__needle_id);
+	bind_image("needle_white.png", &__needle_id);
 
 	bind_image("1.png", &__1_id);
 
