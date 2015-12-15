@@ -213,8 +213,6 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 		brake = (SDL_JoystickGetAxis(joy, 4)/32767.0f)+1;
 
-
-
 		rotation_impulse = -SDL_JoystickGetAxis(joy, 0)/32767.0f;
 
 		camera_rotation_x = -SDL_JoystickGetAxis(joy, 2)/32767.0f;
@@ -273,28 +271,15 @@ void set_camera(Vec3D position, Vec3D rotation);
 		 if (key_state[SDL_SCANCODE_W])
 		 {
 			 car->acceleration.y = 2;
-			 slog("accelerate forwards");
+			 slog("accelerate");
 		 }
-
-		 /*
-		 if (key_state[SDL_SCANCODE_S])
-		 {
-			 car->acceleration.y = -0.1;
-			 slog("accelerate backwards");
-		 }
-		 */
-
 		 if (key_state[SDL_SCANCODE_LEFT])
 		 {
 			 rotation_impulse = 1;
-             slog("rotate left");
-             slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
 		 }
 		 if (key_state[SDL_SCANCODE_RIGHT])
 		 {
 			 rotation_impulse = -1;
-             slog("right");
-             slog("(%f,%f,%f)",cameraRotation.x,cameraRotation.y,cameraRotation.z);
 		 }
 
 		  if (key_state[SDL_SCANCODE_SPACE])
@@ -304,8 +289,9 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 		  if(gear == 1) 
 		  {
-			  car->body.velocity.y += car->acceleration.y*3.5*(current_time - last_time)/1000.0f;
-			  car->body.velocity.y *= 0.98;
+			  car->body.velocity.y += car->acceleration.y*5*(current_time - last_time)/1000.0f;
+			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.97;
+			  else{car->body.velocity.y *= 0.98;}
 		  }
 
 		  else if(gear == 2) 
@@ -321,10 +307,6 @@ void set_camera(Vec3D position, Vec3D rotation);
 			  car->body.velocity.y *= 0.98;
 		  }
 
-
-		//car->body.velocity.y += car->acceleration.y*3*(current_time - last_time)/1000.0f;
-
-
 		if (car->body.velocity.y > 0)
 		{
 			car->body.velocity.y -= brake*4*(current_time - last_time)/1000.0f;
@@ -337,14 +319,11 @@ void set_camera(Vec3D position, Vec3D rotation);
 		}
 		else {car->body.velocity.y = 0;}
 		
-		//car->body.velocity.y *= 0.98;
-		
 		
 		//if (cube_cube_intersection(car->bounds,collision->bounds) == 1) car->body.velocity.y *= 0.5;
 
-		slog("(%f)",car->body.velocity.y);
 
-		car->rotation.z += rotation_impulse*130*(current_time - last_time)/1000.0f;
+		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f;
 
         cameraRotation.z = car->rotation.z;
 
@@ -364,7 +343,6 @@ void set_camera(Vec3D position, Vec3D rotation);
 				vec3d(-sin(car->rotation.z * DEGTORAD),cos(car->rotation.z * DEGTORAD),0),
 				car->body.velocity.y)
 				);
-            //slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
         }
 
         else if (car->body.velocity.y < 0)
@@ -383,16 +361,19 @@ void set_camera(Vec3D position, Vec3D rotation);
 				vec3d(sin(car->rotation.z * DEGTORAD),-cos(car->rotation.z * DEGTORAD),0),
 				-car->body.velocity.y)
 				);
-            //slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
         }
 
-		//car->rotation.y = rotation_impulse*10;
+		slog("(%f)",car->body.velocity.y);
+		
+        slog("(%f,%f,%f)",car->rotation.x,car->rotation.y,car->rotation.z);
+
+		slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
 
 		cameraRotation.z -= rotation_impulse*2;
 
 		cameraRotation.y = -rotation_impulse*1.5;
 
-		cameraRotation.z += camera_rotation_x*90;
+		cameraRotation.z += camera_rotation_x*100;
 
 		vec3d_add(
             cameraPosition,
