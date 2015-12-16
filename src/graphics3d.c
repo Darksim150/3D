@@ -339,7 +339,7 @@ void draw_speed()
 	needleRotation = car->body.velocity.y/10.0*270.0;
 	if(needleRotation < 0)needleRotation *= -1;
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __speed_id, 0, 1);
-	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);
+	drawQuad(vec2d(.5f,.5f/aspect), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);
 }
 
 void draw_gear()
@@ -354,7 +354,6 @@ void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest
 	Vec2D verts[4];
 
 	Vec2D UVs[4];
-
 
 	//upper right
 	verts[0].x = size.x/2/aspect;

@@ -50,6 +50,135 @@ void set_camera(Vec3D position, Vec3D rotation);
  Entity* car;
  Entity* track;
  Entity* collision;
+
+
+
+
+
+
+
+
+
+
+
+ void drawBB(Entity *ent)
+{
+	int tris[36] = 
+					{1,0,2,
+					 2,3,1,
+					 5,4,0,
+					 0,1,5,
+					 5,1,3,
+					 3,7,5,
+					 6,7,2,
+					 7,3,2,
+					 0,4,2,
+					 4,6,2,
+					 4,5,6,
+					 5,7,6};
+	int i;
+	float x = ent->body.bounds.x+ent->body.position.x;
+	float y = ent->body.bounds.y+ent->body.position.y;
+	float z = ent->body.bounds.z+ent->body.position.z;
+	float w = ent->body.bounds.w;
+	float h = ent->body.bounds.h;
+	float d = ent->body.bounds.d;
+	Vec3D verts[8] = 
+	{
+		{x,y+h,z},
+		{x+w,y+h,z},
+		{x,y,z},
+		{x+w,y,z},
+		{x,y+h,z+d},
+		{x+w,y+h,z+d},
+		{x,y,z+d},
+		{x+w,y,z+d}
+	};
+    glEnable(GL_BLEND);
+    glColorMaterial(GL_FRONT,GL_DIFFUSE);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glPushMatrix();
+	glRotatef(ent->rotation.x, 1.0f, 0.0f, 0.0f);
+    glRotatef(ent->rotation.y, 0.0f, 1.0f, 0.0f);
+    glRotatef(ent->rotation.z, 0.0f, 0.0f, 1.0f);
+	glBegin(GL_TRIANGLES);
+
+		for(i=0;i<12;i++)
+		{
+			glColor4f(1.0f,0.0f,0.0f,0.25f);
+			glVertex3f(verts[tris[3*i]].x,
+			verts[tris[3*i]].y,
+			verts[tris[3*i]].z);
+
+			glColor4f(1.0f,0.0f,0.0f,0.25f);
+			glVertex3f(verts[tris[3*i+1]].x,
+			verts[tris[3*i+1]].y,
+			verts[tris[3*i+1]].z);
+
+			glColor4f(1.0f,0.0f,0.0f,0.25f);
+			glVertex3f(verts[tris[3*i+2]].x,
+			verts[tris[3*i+2]].y,
+			verts[tris[3*i+2]].z);
+
+
+
+		}
+		glEnd();
+    glBegin(GL_LINES);
+
+		for(i=0;i<12;i++)
+		{
+			glColor4f(1.0f,1.0f,0.0f,1.0f);
+			glVertex3f(verts[tris[3*i]].x,
+			verts[tris[3*i]].y,
+			verts[tris[3*i]].z);
+
+			glColor4f(1.0f,1.0f,0.0f,1.0f);
+			glVertex3f(verts[tris[3*i+1]].x,
+			verts[tris[3*i+1]].y,
+			verts[tris[3*i+1]].z);
+
+			glColor4f(1.0f,1.0f,0.0f,1.0f);
+			glVertex3f(verts[tris[3*i+1]].x,
+			verts[tris[3*i+1]].y,
+			verts[tris[3*i+1]].z);
+
+			glColor4f(1.0f,1.0f,0.0f,1.0f);
+			glVertex3f(verts[tris[3*i+2]].x,
+			verts[tris[3*i+2]].y,
+			verts[tris[3*i+2]].z);
+
+			glColor4f(1.0f,1.0f,0.0f,1.0f);
+			glVertex3f(verts[tris[3*i+2]].x,
+			verts[tris[3*i+2]].y,
+			verts[tris[3*i+2]].z);
+
+			glColor4f(1.0f,1.0f,0.0f,1.0f);
+			glVertex3f(verts[tris[3*i]].x,
+			verts[tris[3*i]].y,
+			verts[tris[3*i]].z);
+
+
+
+		}
+		glEnd();
+    
+    glDisable(GL_BLEND);
+    glDisable(GL_COLOR_MATERIAL);
+	//slog("%s bb (%f,%f,%f,%f,%f,%f)\n",ent->name,x,y,z,ent->body.bounds.w,ent->body.bounds.h,ent->body.bounds.d);
+	glPopMatrix();
+}
+
+
+
+
+
+
+
+
+
+
+
  
  int main(int argc, char *argv[])
 {
@@ -92,6 +221,9 @@ void set_camera(Vec3D position, Vec3D rotation);
 	collision = entity_new();
 
 	key_state = SDL_GetKeyboardState(NULL);
+
+	space = space_new();
+	space_set_steps(space,100);
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1280,960,0,"gametest3d",16) != 0)
@@ -167,7 +299,13 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 	SDL_JoystickEventState(SDL_ENABLE);
 
-	cube_set(car->bounds,1,1,1,2,2,2);
+	//cube_set(car->bounds,1,1,1,2,2,2);
+
+	cube_set(collision->bounds,1,1,1,2,2,2);
+
+	space_add_body(space,&car->body);
+
+	space_add_body(space,&collision->body);
 
     while (bGameLoopRunning)
     {
@@ -290,7 +428,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 		  if(gear == 1) 
 		  {
 			  car->body.velocity.y += car->acceleration.y*5*(current_time - last_time)/1000.0f;
-			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.97;
+			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.972;
 			  else{car->body.velocity.y *= 0.98;}
 		  }
 
@@ -319,8 +457,16 @@ void set_camera(Vec3D position, Vec3D rotation);
 		}
 		else {car->body.velocity.y = 0;}
 		
+		cube_set(car->body.bounds, car->body.position.x,car->body.position.y,car->body.position.z,1,1,1);
+
+		cube_set(collision->body.bounds, collision->body.position.x,collision->body.position.y,collision->body.position.z,1,1,1);
+
 		
-		//if (cube_cube_intersection(car->bounds,collision->bounds) == 1) car->body.velocity.y *= 0.5;
+		if (cube_cube_intersection(car->bounds,collision->bounds) == 1)
+		{
+			car->body.velocity.y *= 0.5;
+		}
+		
 
 
 		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f;
@@ -409,9 +555,13 @@ void set_camera(Vec3D position, Vec3D rotation);
 		
 		entity_draw(track);
 
-		//entity_draw(collision);
+		entity_draw(collision);
 
 		entity_draw(car);
+
+		//drawBB(collision);
+
+		//drawBB(car);
 
 		glPopMatrix();
 
@@ -449,5 +599,6 @@ void set_camera(Vec3D position, Vec3D rotation)
                  -position.y,
                  -position.z);
 }
+
 
 /*eol@eof*/

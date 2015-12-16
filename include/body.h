@@ -5,8 +5,9 @@
 #include "collisions.h"
 #include "mgl_callback.h"
 
-typedef struct
+typedef struct Body_S
 {
+	struct Entity_S* owner;
     Vec3D position;
     Vec3D velocity;
     Cube bounds;

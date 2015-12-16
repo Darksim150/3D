@@ -131,7 +131,4 @@ void entity_load_sprite(Entity *ent, char *filename, int fw, int fh)
 }
 
 
-
-
-
 /*eol@eof*/

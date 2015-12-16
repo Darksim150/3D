@@ -2,8 +2,11 @@
 #include "space.h"
 #include "body.h"
 #include "simple_logger.h"
+#include "entity.h"
 
 #include <glib.h>
+
+extern Entity *car;
 
 struct Space_S
 {
@@ -82,8 +85,12 @@ static void space_body_update(Space *space,Body *body)
         vec3d_add(b,b,other->bounds);
         if (cube_cube_intersection(a,b))
         {
-            /*call touch functions*/
-            /*back the fuck off*/
+			if (body->owner == car)	
+				car->body.velocity.y *= 0.5;
+            //call touch functions
+            //back the fuck off
+
+			/*
             vec3d_cpy(body->_stepOffVector,stepOffVector);
             body->_done = 1;
             body->_needsBackoff = 1;
@@ -91,6 +98,7 @@ static void space_body_update(Space *space,Body *body)
             {
                 body->touch.function(body->touch.data,other);
             }
+			*/
         }
     }
 }
