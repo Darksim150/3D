@@ -181,7 +181,7 @@ void graphics3d_setup_default_light()
     GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat mat_shininess[] = { 50.0 };
     GLfloat light_position[] = { -10.0, -10.0, 10.0, 0.0 };
-    GLfloat light_ambient[] = { 3.0, 3.0, 3.0, 3.0 };//made everything brighter
+    GLfloat light_ambient[] = { 3.0, 3.0, 3.0, 3.0 }; //made everything brighter
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
     
@@ -231,7 +231,7 @@ void graphics3d_setup_default_light()
 /*eol@eof*/
 
 
-void draw_title()
+void draw_title() //original hardcoded draw orthogonal image function
 {
 	Vec3D verts[4];
 
@@ -308,7 +308,7 @@ void draw_title()
 	orthogonalEnd();
 }
 
-void orthogonalStart()
+void orthogonalStart() //enables orthogonal mode
 {
 	glMatrixMode(GL_PROJECTION);
 
@@ -322,7 +322,7 @@ void orthogonalStart()
 	glPushMatrix();
 }
 
-void orthogonalEnd()
+void orthogonalEnd() //disables orthogonal
 {
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -353,7 +353,7 @@ void draw_lap()
 	else if(lap ==2)drawQuad(vec2d(.25f,.25f), vec2d(-.75f,.75f), __2_id, 0, 1);
 }
 
-void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest)
+void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest) //function for drawing images to screen
 {
 	Vec2D verts[4];
 
@@ -432,7 +432,7 @@ void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest
 	orthogonalEnd();
 }
 
-void bind_image(char* file, GLuint *id)
+void bind_image(char* file, GLuint *id) //function for binding images to gpu memory
 {
 	int Mode = GL_RGB;
 

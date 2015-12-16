@@ -168,7 +168,7 @@ const Uint8 *key_state;
 	start->scale.z = 0.1;
 	start->body.position.x = -1;
 
-	entity_obj_load(check1,"models/cube.obj");
+	entity_obj_load(check1,"models/cube.obj");//these were markers for the collision, used only for testing and not drawn to screen currently
 	entity_load_sprite(check1,"models/cube_text.png",1024,1024);
 
 	check1->body.position.x = -300;
@@ -212,7 +212,7 @@ const Uint8 *key_state;
 
 	SDL_JoystickEventState(SDL_ENABLE);
 
-	cube_set(car->body.bounds,car->body.position.x,car->body.position.y,car->body.position.z,2,2,2);
+	cube_set(car->body.bounds,car->body.position.x-1,car->body.position.y-1,car->body.position.z-1,2,2,2);
 
 	cube_set(start->body.bounds,-40,0,0,80,20,1);
 
@@ -265,30 +265,30 @@ const Uint8 *key_state;
 			}
 			*/
 
-			else if(e.type == SDL_JOYBUTTONDOWN);
+			//else if(e.type == SDL_JOYBUTTONDOWN);
 				//bGameLoopRunning = 0;
 		}
 
 
-		car->acceleration.y = (SDL_JoystickGetAxis(joy, 5)/32768.0f)+1;
+		car->acceleration.y = (SDL_JoystickGetAxis(joy, 5)/32768.0f)+1; //convert raw axis value to 0 - 2
 
 		brake = (SDL_JoystickGetAxis(joy, 4)/32767.0f)+1;
 
-		rotation_impulse = -SDL_JoystickGetAxis(joy, 0)/32767.0f;
+		rotation_impulse = -SDL_JoystickGetAxis(joy, 0)/32767.0f; //convert raw value to -1 to 1
 
 		camera_rotation_x = -SDL_JoystickGetAxis(joy, 2)/32767.0f;
 
-		if (rotation_impulse < 0.1 && rotation_impulse > -0.1) rotation_impulse = 0;
+		if (rotation_impulse < 0.1 && rotation_impulse > -0.1) rotation_impulse = 0; //deadzone checks for turning
 		else if (rotation_impulse > 0.1) rotation_impulse -= 0.1;
 		else if (rotation_impulse < -0.1) rotation_impulse += 0.1;
 
-		if (camera_rotation_x < 0.1 && camera_rotation_x > -0.1) camera_rotation_x = 0;
+		if (camera_rotation_x < 0.1 && camera_rotation_x > -0.1) camera_rotation_x = 0; //deadzone checks for camera rotation
 		else if (camera_rotation_x > 0.1) camera_rotation_x -= 0.1;
 		else if (camera_rotation_x < -0.1) camera_rotation_x += 0.1;
 
-		if (SDL_JoystickGetButton(joy,7) == 1) camera_reverse = 1;
+		if (SDL_JoystickGetButton(joy,7) == 1 || key_state[SDL_SCANCODE_R]) camera_reverse = 1; //look back
 		
-		if(SDL_JoystickGetButton(joy, 12) == 1 || key_state[SDL_SCANCODE_D])
+		if(SDL_JoystickGetButton(joy, 12) == 1 || key_state[SDL_SCANCODE_D]) //change gear
 		{
 			if(square == 0)
 			{
@@ -326,7 +326,7 @@ const Uint8 *key_state;
 
 		//slog("(%d)",SDL_JoystickGetButton(joy, 1));
 
-         if (key_state[SDL_SCANCODE_ESCAPE])
+         if (key_state[SDL_SCANCODE_ESCAPE]) //crappy old keyboard controls
          {
 			 bGameLoopRunning = 0;
 		 }
@@ -335,7 +335,7 @@ const Uint8 *key_state;
 		 {
 			 car->acceleration.y = 2;
 		 }
-		 if (key_state[SDL_SCANCODE_LEFT])
+		 if (key_state[SDL_SCANCODE_LEFT]) 
 		 {
 			 rotation_impulse = 1;
 		 }
@@ -349,10 +349,10 @@ const Uint8 *key_state;
 			 brake = 1;
 		 }
 
-		  if(gear == 1) 
+		  if(gear == 1) //apply acceleration to velocity depending on gear
 		  {
 			  car->body.velocity.y += car->acceleration.y*5*(current_time - last_time)/1000.0f;
-			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.972;
+			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.972; //drag changes only when accelerating
 			  else{car->body.velocity.y *= 0.98;}
 		  }
 
@@ -369,10 +369,10 @@ const Uint8 *key_state;
 			  car->body.velocity.y *= 0.98;
 		  }
 
-		if (car->body.velocity.y > 0)
+		if (car->body.velocity.y > 0) //braking checks
 		{
 			car->body.velocity.y -= brake*4*(current_time - last_time)/1000.0f;
-			if  (car->body.velocity.y < 0) car->body.velocity.y = 0;
+			if  (car->body.velocity.y < 0) car->body.velocity.y = 0; //clamp to 0
 		}
 		else if (car->body.velocity.y < 0)
 		{
@@ -381,16 +381,16 @@ const Uint8 *key_state;
 		}
 		else {car->body.velocity.y = 0;}
 		
-		cube_set(car->body.bounds,car->body.position.x,car->body.position.y,car->body.position.z,2,2,2);
+		cube_set(car->body.bounds,car->body.position.x-1,car->body.position.y-1,car->body.position.z-1,2,2,2); //update player collision in game space
 
 		/*
 		if (cube_cube_intersection(car->body.bounds,start->body.bounds) == 1)
 		{
-			car->body.velocity.y *= 0.5;//for checking collision
+			car->body.velocity.y *= 0.5;  //for checking collision
 		}
 		*/
 
-		if (cube_cube_intersection(car->body.bounds,start->body.bounds) == 1 && checkpoint == 3) 
+		if (cube_cube_intersection(car->body.bounds,start->body.bounds) == 1 && checkpoint == 3) //collision checks
 		{
 				checkpoint = 0;
 				lap++;
@@ -420,16 +420,11 @@ const Uint8 *key_state;
 				slog("(%d)",checkpoint);
 		}
 
+		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f; //rotate camera
 
+        cameraRotation.z = car->rotation.z; //camera rotates with car
 
-
-
-
-		car->rotation.z += rotation_impulse*150*(current_time - last_time)/1000.0f;
-
-        cameraRotation.z = car->rotation.z;
-
-		if (car->body.velocity.y > 0)
+		if (car->body.velocity.y > 0) //moving both car and camera
         {
             vec3d_add(
                 cameraPosition,
@@ -472,23 +467,23 @@ const Uint8 *key_state;
 
 		slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
 		*/
-		cameraRotation.z -= rotation_impulse*3;
+		cameraRotation.z -= rotation_impulse*3; //camera counterrotates to show direction player is turning
 
-		cameraRotation.y = -rotation_impulse*1.5;
+		cameraRotation.y = -rotation_impulse*1.5; //camera leans in the direction player is turning
 
-		cameraRotation.z += camera_rotation_x*100;
+		cameraRotation.z += camera_rotation_x*100; //apply camera rotation
 
-		if(camera_reverse == 1) cameraRotation.z += 180;
+		if(camera_reverse == 1) cameraRotation.z += 180; //look back
 
 		vec3d_add(
             cameraPosition,
             cameraPosition,
-            vec_scale(vec3d(sin(cameraRotation.z * DEGTORAD),-cos(cameraRotation.z * DEGTORAD),0), 7.5 + (car->body.velocity.y*0.5))
+            vec_scale(vec3d(sin(cameraRotation.z * DEGTORAD),-cos(cameraRotation.z * DEGTORAD),0), 7.5 + (car->body.velocity.y*0.5)) //camera distance from player scales with velocity
 		);
 
 		cameraPosition.z = 5;
 
-		cameraRotation.x = 70;
+		cameraRotation.x = 70; //reposition camera before drawing
 
         graphics3d_frame_begin();
 
@@ -542,7 +537,7 @@ const Uint8 *key_state;
 
 		cameraRotation.x = 90;
 
-		cameraPosition = car->body.position;
+		cameraPosition = car->body.position; //reset camera position
     } 
 
 	// Close if opened
