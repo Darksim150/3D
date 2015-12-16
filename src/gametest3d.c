@@ -94,7 +94,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 	key_state = SDL_GetKeyboardState(NULL);
     
     init_logger("gametest3d.log");
-    if (graphics3d_init(1280,960,1,"gametest3d",16) != 0)
+    if (graphics3d_init(1280,960,0,"gametest3d",16) != 0)
     {
         return -1;
     }
@@ -369,7 +369,7 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 		slog("(%f,%f,%f)",car->body.position.x,car->body.position.y,car->body.position.z);
 
-		cameraRotation.z -= rotation_impulse*2;
+		cameraRotation.z -= rotation_impulse*3;
 
 		cameraRotation.y = -rotation_impulse*1.5;
 

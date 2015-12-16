@@ -43,7 +43,7 @@
  * @param frameDelay the desired delay (in ms) between frames
  * @return -1 on error, 0 otherwise
  */
-int graphics3d_init(int sw,int sh,int fullscreen,const char *project, Uint32 frameDelay);
+int graphics3d_init(float sw,float sh,int fullscreen,const char *project, Uint32 frameDelay);
 
 /**
  * @brief get the active shader program index

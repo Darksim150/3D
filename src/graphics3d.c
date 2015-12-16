@@ -21,6 +21,8 @@ static GLuint		 __R_id;
 
 GLfloat needleRotation = 0;
 
+float aspect;
+
 int gear;
 
 void graphics3d_close();
@@ -32,13 +34,16 @@ GLuint graphics3d_get_shader_program()
 
 void graphics3d_setup_default_light();
 
-int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 frameDelay)
+int graphics3d_init(float sw,float sh,int fullscreen,const char *project,Uint32 frameDelay)
 {
+
 	int Mode = GL_RGB;
 
     const unsigned char *version;
     GLenum glew_status;
         
+	aspect = sw/sh;
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
     {
         slog("failed to initialize SDL!");
@@ -47,11 +52,22 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     atexit(SDL_Quit);
     __graphics3d_frame_delay = frameDelay;
     
-    __graphics3d_window = SDL_CreateWindow(project?project:"gametest3d",
+    if(fullscreen == 1)
+		{
+			__graphics3d_window = SDL_CreateWindow(project?project:"gametest3d",
+                              SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              sw, sh,
+                              SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+	}
+	else
+	{
+		__graphics3d_window = SDL_CreateWindow(project?project:"gametest3d",
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               sw, sh,
                               SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+	}
     
     
     __graphics3d_gl_context = SDL_GL_CreateContext(__graphics3d_window);
@@ -167,11 +183,12 @@ void graphics3d_setup_default_light()
     GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat mat_shininess[] = { 50.0 };
     GLfloat light_position[] = { -10.0, -10.0, 10.0, 0.0 };
-    GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_ambient[] = { 3.0, 3.0, 3.0, 3.0 };//made everything brighter
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
     
     GLfloat light1_ambient[] = { 1.2, 1.2, 1.2, 1.0 };
+
     GLfloat light1_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light1_specular[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light1_position[] = { -20.0, 2.0, 1.0, 1.0 };
@@ -340,28 +357,28 @@ void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest
 
 
 	//upper right
-	verts[0].x = size.x/2;
+	verts[0].x = size.x/2/aspect;
 	verts[0].y = size.y/2;
 
 	UVs[0].x = 1;
 	UVs[0].y = 0;
 
 	//upper left
-	verts[1].x = -size.x/2;
+	verts[1].x = -size.x/2/aspect;
 	verts[1].y = size.y/2;
 
 	UVs[1].x = 0;
 	UVs[1].y = 0;
 
 	//bottom left
-	verts[2].x = -size.x/2;
+	verts[2].x = -size.x/2/aspect;
 	verts[2].y = -size.y/2;
 
 	UVs[2].x = 0;
 	UVs[2].y = 1;
 
 	//bottom right
-	verts[3].x = size.x/2;
+	verts[3].x = size.x/2/aspect;
 	verts[3].y = -size.y/2;
 
 	UVs[3].x = 1;
