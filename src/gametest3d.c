@@ -28,7 +28,7 @@
 #include "entity.h"
 #include "collisions.h"
 //#include "space.h"
-#include "mgl_callback.h"
+//#include "mgl_callback.h"
 
 void set_camera(Vec3D position, Vec3D rotation);
  Vec3D cameraPosition = {0,0,0};
@@ -79,6 +79,10 @@ const Uint8 *key_state;
 	float camera_rotation_x;
 
 	int checkpoint;
+
+	int lap_time;
+
+	int last_lap_time;
 
     SDL_Event e;
     Obj *obj,*bgobj;
@@ -200,13 +204,17 @@ const Uint8 *key_state;
 
 	lap = 1;
 
+	lap_time = 0;
+
+	last_lap_time = 0;
+
 	current_time = SDL_GetTicks();
 
 	SDL_JoystickEventState(SDL_ENABLE);
 
 	cube_set(car->body.bounds,car->body.position.x,car->body.position.y,car->body.position.z,2,2,2);
 
-	cube_set(start->body.bounds,-40,-10,0,80,20,1);
+	cube_set(start->body.bounds,-40,0,0,80,20,1);
 
 	cube_set(check1->body.bounds,-310,350,0,20,80,1);
 
@@ -220,6 +228,10 @@ const Uint8 *key_state;
     {
 		last_time = current_time;
 		current_time = SDL_GetTicks();
+
+		lap_time += (current_time - last_time);
+
+		slog("(%d)",lap_time);
 
 		car->acceleration.y = 0;
 
@@ -371,12 +383,23 @@ const Uint8 *key_state;
 		
 		cube_set(car->body.bounds,car->body.position.x,car->body.position.y,car->body.position.z,2,2,2);
 
+		/*
+		if (cube_cube_intersection(car->body.bounds,start->body.bounds) == 1)
+		{
+			car->body.velocity.y *= 0.5;//for checking collision
+		}
+		*/
+
 		if (cube_cube_intersection(car->body.bounds,start->body.bounds) == 1 && checkpoint == 3) 
 		{
 				checkpoint = 0;
 				lap++;
+				last_lap_time = lap_time;
+				lap_time = 0;
 				slog("(%d)",checkpoint);
 				slog("(%d)",lap);
+				slog("(%d)",last_lap_time);
+
 		}
 
 		if (cube_cube_intersection(car->body.bounds,check1->body.bounds) == 1 && checkpoint == 0) 
