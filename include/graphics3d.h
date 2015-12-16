@@ -75,8 +75,12 @@ void bind_image(char* file, GLuint *id);
 
 void draw_gear();
 
+void draw_lap();
+
 extern GLfloat needleRotation;
 
 extern int gear;
+
+extern int lap;
 
 #endif

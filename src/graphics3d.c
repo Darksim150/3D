@@ -23,8 +23,6 @@ GLfloat needleRotation = 0;
 
 float aspect;
 
-int gear;
-
 void graphics3d_close();
 
 GLuint graphics3d_get_shader_program()
@@ -42,7 +40,7 @@ int graphics3d_init(float sw,float sh,int fullscreen,const char *project,Uint32 
     const unsigned char *version;
     GLenum glew_status;
         
-	aspect = sw/sh;
+	aspect = sw/sh; //set aspect ratio
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
     {
@@ -339,14 +337,20 @@ void draw_speed()
 	needleRotation = car->body.velocity.y/10.0*270.0;
 	if(needleRotation < 0)needleRotation *= -1;
 	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __speed_id, 0, 1);
-	drawQuad(vec2d(.5f,.5f), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);
+	drawQuad(vec2d(.5f,.5f/aspect), vec2d(.75f,-.75f), __needle_id, -needleRotation, 1);
 }
 
 void draw_gear()
 {
-	if(gear == 1)drawQuad(vec2d(.25f,.35f), vec2d(-.75f,-.75f), __1_id, 0, 1);
-	else if(gear == 2)drawQuad(vec2d(.25f,.35f), vec2d(-.75f,-.75f), __2_id, 0, 1);
-	else if(gear == 0)drawQuad(vec2d(.25f,.35f), vec2d(-.75f,-.75f), __R_id, 0, 1);
+	if(gear == 1)drawQuad(vec2d(.25f,.25f), vec2d(-.75f,-.75f), __1_id, 0, 1);
+	else if(gear == 2)drawQuad(vec2d(.25f,.25f), vec2d(-.75f,-.75f), __2_id, 0, 1);
+	else if(gear == 0)drawQuad(vec2d(.25f,.25f), vec2d(-.75f,-.75f), __R_id, 0, 1);
+}
+
+void draw_lap()
+{
+	if(lap == 1)drawQuad(vec2d(.25f,.25f), vec2d(-.75f,.75f), __1_id, 0, 1);
+	else if(lap ==2)drawQuad(vec2d(.25f,.25f), vec2d(-.75f,.75f), __2_id, 0, 1);
 }
 
 void drawQuad(Vec2D size, Vec2D pos, GLuint tex_id, GLfloat angle, int depthTest)
