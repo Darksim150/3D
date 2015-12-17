@@ -38,6 +38,8 @@ Vec4D vec4d(float x,float y, float z, float w);
 
 #define vec3d_scale(dst,src,scale) (dst.x = src.x *scale,dst.y = src.y *scale,dst.z = src.z *scale)
 
+#define vec_convert_Vec3D (dst, a) (dst.x = a[0], dst.y = a[1], dst.z = a[2])
+
 Vec3D Normalize(Vec3D vector);
 
 Vec3D vec_scale(Vec3D vec, float scale);

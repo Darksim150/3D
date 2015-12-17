@@ -84,6 +84,16 @@ const Uint8 *key_state;
 
 	int last_lap_time;
 
+	int i;
+
+	int hit;
+
+	Vec3D v0;
+
+	Vec3D v1;
+
+	Vec3D v2;
+
     SDL_Event e;
     Obj *obj,*bgobj;
     Sprite *texture,*bgtext;
@@ -158,6 +168,8 @@ const Uint8 *key_state;
 	car->scale.y = 2;
 	car->scale.z = 2;
 
+	car->body.position.x = 430;
+
 	entity_obj_load(track,"models/track.obj");
 	entity_load_sprite(track,"models/track_text.png",1024,1024);
 
@@ -186,8 +198,8 @@ const Uint8 *key_state;
 	check3->body.position.x = -300;
 	check3->body.position.y = -360;
 
-	track->rotation.x = 90;
-	track->rotation.y = 90;
+	//track->rotation.x = 90;
+	//track->rotation.y = 90;
 	
 	bgobj = obj_load("models/grass.obj");
     bgtext = LoadSprite("models/grass_text.png",1024,1024);
@@ -223,7 +235,6 @@ const Uint8 *key_state;
 	cube_set(check3->body.bounds,-310,-400,0,20,80,1);
 
 
-
     while (bGameLoopRunning)
     {
 		last_time = current_time;
@@ -231,7 +242,7 @@ const Uint8 *key_state;
 
 		lap_time += (current_time - last_time);
 
-		slog("(%d)",lap_time);
+		//slog("(%d)",lap_time);
 
 		car->acceleration.y = 0;
 
@@ -270,7 +281,7 @@ const Uint8 *key_state;
 		}
 
 
-		car->acceleration.y = (SDL_JoystickGetAxis(joy, 5)/32768.0f)+1; //convert raw axis value to 0 - 2
+		car->acceleration.y = (SDL_JoystickGetAxis(joy, 5)/32768.0f)+1; //convert raw axis value to 0 to 2
 
 		brake = (SDL_JoystickGetAxis(joy, 4)/32767.0f)+1;
 
@@ -356,14 +367,14 @@ const Uint8 *key_state;
 			  else{car->body.velocity.y *= 0.98;}
 		  }
 
-		  else if(gear == 2) 
+		  else if(gear == 2)
 		  {
 			  car->body.velocity.y += car->acceleration.y*1*(current_time - last_time)/1000.0f;
 			  if(car->acceleration.y > 0.1)car->body.velocity.y *= 0.997;
 			  else{car->body.velocity.y *= 0.98;}
 		  }
 
-		  else if(gear == 0) 
+		  else if(gear == 0)
 		  {
 			  car->body.velocity.y -= car->acceleration.y*1*(current_time - last_time)/1000.0f;
 			  car->body.velocity.y *= 0.98;
@@ -380,7 +391,31 @@ const Uint8 *key_state;
 			if  (car->body.velocity.y > 0) car->body.velocity.y = 0;
 		}
 		else {car->body.velocity.y = 0;}
-		
+
+		hit=0;
+
+		for(i = 0; i < track->objModel->num_tris; i++)
+		{
+			v0.x = track->objModel->vertex_array[track->objModel->triangle_array[i].p[0].v * 3];
+			v0.y = track->objModel->vertex_array[track->objModel->triangle_array[i].p[0].v * 3+1];
+			v0.z = track->objModel->vertex_array[track->objModel->triangle_array[i].p[0].v * 3+2];
+
+			v1.x = track->objModel->vertex_array[track->objModel->triangle_array[i].p[1].v * 3];
+			v1.y = track->objModel->vertex_array[track->objModel->triangle_array[i].p[1].v * 3+1];
+			v1.z = track->objModel->vertex_array[track->objModel->triangle_array[i].p[1].v * 3+2];
+
+			v2.x = track->objModel->vertex_array[track->objModel->triangle_array[i].p[2].v * 3];
+			v2.y = track->objModel->vertex_array[track->objModel->triangle_array[i].p[2].v * 3+1];
+			v2.z = track->objModel->vertex_array[track->objModel->triangle_array[i].p[2].v * 3+2];
+
+			if(RayTriangleCollision(car->body.position,vec3d(0,-1,0),v0,v1,v2))
+				hit = 1;
+				
+		}
+		if(!hit){
+			slog("off track %d \n",SDL_GetTicks());
+			car->body.velocity.y *= 0.75;
+		}
 		cube_set(car->body.bounds,car->body.position.x-1,car->body.position.y-1,car->body.position.z-1,2,2,2); //update player collision in game space
 
 		/*
@@ -505,17 +540,16 @@ const Uint8 *key_state;
             vec4d(1,1,1,1),
             bgtext
         );
-
 		
 		entity_draw(track);
 
 		entity_draw(start);
 
-		//entity_draw(check1);
+		entity_draw(check1);
 
-		//entity_draw(check2);
+		entity_draw(check2);
 
-		//entity_draw(check3);
+		entity_draw(check3);
 
 		entity_draw(car);
 

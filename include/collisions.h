@@ -16,4 +16,9 @@ int cube_cube_intersection(
     Cube a,
     Cube b);
 
+typedef float Vec;
+typedef Vec Vec3[3];
+
+int RayTriangleCollision(Vec3D origin, Vec3D dir, Vec3D vert0, Vec3D vert1, Vec3D vert2);
+
 #endif

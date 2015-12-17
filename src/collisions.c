@@ -1,5 +1,13 @@
 #include "collisions.h"
 #include "math.h"
+#include "vector.h"
+
+
+#define EPSILON .00000001
+#define CROSS(dest, v1, v2) (dest[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]), dest[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]), dest[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]))
+#define DOT(v1, v2) ((v1[0] * v2[0]) + (v1[1] * v2[1]) + (v1[2] * v2[2]))
+#define SUB(dest, v1, v2) (dest[0] = v1[0] - v2[0], dest[1] = v1[1] - v2[1], dest[2] = v1[2] - v2[2])
+
 
 int sphere_sphere_intersection(
     Vec3D c1,float r1,   /*sphere 1*/
@@ -97,6 +105,91 @@ int sphere_cube_intersection(
         return 1;
     }
     return 0;
+}
+
+int RayTriangleCollision(Vec3D origin, Vec3D dir, Vec3D vert0, Vec3D vert1, Vec3D vert2)
+{
+	Vec3 edge1, edge2, tvec, pvec, qvec;
+	float det, inv_det;
+	float t, u, v;
+
+	float *o;
+
+	float *d;
+
+	float *v0,*v1,*v2;
+		
+	v0 = (float *)(&vert0);
+	v1 = (float *)(&vert1);
+	v2 = (float *)(&vert2);
+
+	o = (float *)(&origin);
+
+	d = (float *)(&dir);
+
+	/* find vectors for two edges sharing vert0*/
+	SUB(edge1, v1, v0);
+	SUB(edge2, v2, v0);
+
+	/* begin calculating determinant - also used to calculated U parameter */
+	CROSS(pvec, d, edge2);
+
+	/* if determinant is near zero, ray lies in plane of triangle*/
+	det = DOT(edge1, pvec);
+#ifdef TEST_CULL /* Define TEST_CULL if culling */
+	if (det < EPSILON)
+		return 0;
+
+	/* calculate distance from vert0 to ray origin */
+	SUB(tvec, origin, vert0);
+
+	/* calculate U parameter and test bounds*/
+	u = DOT(tvec, pvec);
+
+	if (*u < 0.0 || *u > det)
+		return 0;
+
+	CROSS(qvec, tvec, edge1);
+
+	/* calculate V parameter and test bounds*/
+	v = DOT(dir, qvec);
+
+	if (*v < 0.0 || *u + *v > det)
+		return 0;
+
+	/* calculate t, scale parameters, ray intersects triangle*/
+	t = DOT(edge2, qvec);
+	inv_det = 1.0 / det;
+	t *= inv_det;
+	u *= inv_det;
+	v *= inv_det;
+#else /* Non-culling branch*/
+	if (det > -EPSILON && det < EPSILON)
+		return 0;
+
+	inv_det = 1.0 / det;
+
+	/* calculate distance from vert0 to ray origin */
+	SUB(tvec, o, v0);
+
+	/* calculate U parameter and test bounds */
+	u = DOT(tvec, pvec) * inv_det;
+
+	if (u < 0.0 || u > 1.0)
+		return 0;
+
+	CROSS(qvec, tvec, edge1);
+
+	/* calculate V parameter and test bounds */
+	v = DOT(d, qvec) * inv_det;
+
+	if (v < 0.0 || u + v > 1.0)
+		return 0;
+
+	/* calculate t, ray intersects triangle */
+	t = DOT(edge2, qvec) * inv_det;
+#endif
+	return 1;
 }
 
 /*eol@eof*/

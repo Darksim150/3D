@@ -16,6 +16,7 @@ typedef struct Entity_S
     Vec3D rotation;
     Vec3D scale;
     Vec4D color;
+	Vec3 temp_position;
     Obj *objModel;
     Obj *objAnimation[24];
     int state;
