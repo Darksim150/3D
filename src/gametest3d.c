@@ -114,7 +114,7 @@ const Uint8 *key_state;
 	key_state = SDL_GetKeyboardState(NULL);
     
     init_logger("gametest3d.log");
-    if (graphics3d_init(1280,960,0,"gametest3d",16) != 0)
+    if (graphics3d_init(1920,1080,1,"gametest3d",16) != 0)
     {
         return -1;
     }
@@ -222,7 +222,7 @@ const Uint8 *key_state;
 
 	cube_set(check3->body.bounds,-310,-400,0,20,80,1);
 
-
+	SDL_ShowCursor(SDL_DISABLE);
 
     while (bGameLoopRunning)
     {
