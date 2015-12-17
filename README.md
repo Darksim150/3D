@@ -1,24 +1,18 @@
-# gametest3d
-A seed project for 3D Game Development students.
+# Fraud-Zero
 
-## Overview
-This reposity will be used as the base code project for the 3D Game Development course at NJIT.
+I was originally going to call this Block Racer 3D but after I got rid of the block it didn't really fit anymore
 
-This project will contain the absolute basics for setting up OpenGL 4 with windows and linux (and possibly other platforms in the future).
+Needs an xinput controller, so either a 360 or xbone controller, or anything with an xinput wrapper (DS3, DS4)
 
-In class examples will be pushed as date-named branches
+Left stick turns
 
-## Dependencies
-These are the libraries that will be needed in order to build this project:
- * SDL2 - Compiled against the 32 bit SDL2 Core as well as SDL_Image.  This library provides most of the non-3d game engine needs like input handling and 2d graphics loading.
- * libGL - The OpenGl Library.
- * GLEW - A companion library that sets up your code to use the correct version of OpenGL
- * GLFW - Another helper library that helps set up GL in a window context
+Right trigger accelerates
 
-## Roadmap
-The plan for the project is to provide these basic source files:
- * gametest3d.c the home of int main();
- * graphics3d.c/.h provides initialization of the 3d graphics system, configuration of the same
- * obj.c/.h provides code to load and parse and store 3d model data of the .obj format
- * shaders.c/.h - provides a basic interface to the gl shader system
+Left trigger brakes
+
+Right stick rotates the camera, pressing the right stick reverses the camera
+
+A/Cross shifts the gear down
+
+X/Square shifts up
 
